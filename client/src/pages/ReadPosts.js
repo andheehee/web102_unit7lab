@@ -1,24 +1,28 @@
 import React, { useState, useEffect } from 'react';
+import supabase from '../supabaseClient';
 import Card from '../components/Card';
 
-const ReadPosts = (props) => {
+const ViewCrewmates = () => {
+  const [crewmates, setCrewmates] = useState([]);
 
-    const [posts, setPosts] = useState([]);
+  useEffect(() => {
+    const fetchCrewmates = async () => {
+      const { data, error } = await supabase.from('crewmates').select();
+      if (error) console.error(error);
+      else setCrewmates(data);
+    };
+    fetchCrewmates();
+  }, []);
 
-    useEffect(() => {
-        setPosts(props.data);
-    }, [props]);
-    
-    return (
-        <div className="ReadPosts">
-            {
-                posts && posts.length > 0 ?
-                posts.map((post,index) => 
-                   <Card id={post.id} title={post.title} author={post.author} description={post.description}/>
-                ) : <h2>{'No Challenges Yet 😞'}</h2>
-            }
-        </div>  
-    )
-}
+  return (
+    <div className="ViewCrewmates">
+      {crewmates.length > 0
+        ? crewmates.map((crewmate) => (
+            <Card key={crewmate.id} {...crewmate} />
+          ))
+        : <h2>No Crewmates Found</h2>}
+    </div>
+  );
+};
 
-export default ReadPosts;
+export default ViewCrewmates;

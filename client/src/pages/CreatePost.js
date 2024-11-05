@@ -1,39 +1,37 @@
-import React from 'react';
-import './CreatePost.css'
+// src/pages/CreateCrewmate.js
+import React, { useState } from 'react';
+import supabase from '../supabaseClient';
 
-const CreatePost = () => {
+const CreateCrewmate = () => {
+  const [crewmate, setCrewmate] = useState({ name: '', attribute: '' });
 
-    const [post, setPost] = useState({title: "", author: "", description: ""})
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setCrewmate((prev) => ({ ...prev, [name]: value }));
+  };
 
-    const handleChange = (event) => {
-        const {name, value} = event.target;
-        setPost( (prev) => {
-            return {
-                ...prev,
-                [name]:value,
-            }
-        })
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const { data, error } = await supabase.from('crewmates').insert([crewmate]);
+    if (error) {
+      console.error('Error creating crewmate:', error.message);
+    } else {
+      console.log('Crewmate created:', data);
     }
+  };
+  
 
-    return (
-        <div>
-            <form>
-                <label for="title">Title</label> <br />
-                <input type="text" id="title" name="title" onChange={handleChange} /><br />
-                <br/>
+  return (
+    <div>
+      <form onSubmit={handleSubmit}>
+        <label>Name</label>
+        <input type="text" name="name" onChange={handleChange} />
+        <label>Attribute</label>
+        <input type="text" name="attribute" onChange={handleChange} />
+        <button type="submit">Add Crewmate</button>
+      </form>
+    </div>
+  );
+};
 
-                <label for="author">Author</label><br />
-                <input type="text" id="author" name="author" onChange={handleChange} /><br />
-                <br/>
-
-                <label for="description">Description</label><br />
-                <textarea rows="5" cols="50" id="description" onChange={handleChange}>
-                </textarea>
-                <br/>
-                <input type="submit" value="Submit" />
-            </form>
-        </div>
-    )
-}
-
-export default CreatePost
+export default CreateCrewmate;

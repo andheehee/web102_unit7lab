@@ -1,42 +1,49 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
-import './EditPost.css'
+import React, { useState, useEffect } from 'react';
 
-const EditPost = ({data}) => {
+import { useParams, useNavigate } from 'react-router-dom';
+import supabase from '../supabaseClient';
 
-    const {id} = useParams();
-    const [post, setPost] = useState({id: null, title: "", author: "", description: ""});
+const EditCrewmate = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [crewmate, setCrewmate] = useState({ name: '', attribute: '' });
 
-    const handleChange = (event) => {
-        const {name, value} = event.target;
-        setPost( (prev) => {
-            return {
-                ...prev,
-                [name]:value,
-            }
-        })
-    }
+  useEffect(() => {
+    const fetchCrewmate = async () => {
+      const { data } = await supabase.from('crewmates').select().eq('id', id).single();
+      setCrewmate(data);
+    };
+    fetchCrewmate();
+  }, [id]);
 
-    return (
-        <div>
-            <form>
-                <label for="title">Title</label> <br />
-                <input type="text" id="title" name="title" value={post.title} onChange={handleChange} /><br />
-                <br/>
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setCrewmate((prev) => ({ ...prev, [name]: value }));
+  };
 
-                <label for="author">Author</label><br />
-                <input type="text" id="author" name="author" value={post.author} onChange={handleChange} /><br />
-                <br/>
+  const handleUpdate = async (e) => {
+    e.preventDefault();
+    await supabase.from('crewmates').update(crewmate).eq('id', id);
+    navigate('/');
+  };
 
-                <label for="description">Description</label><br />
-                <textarea rows="5" cols="50" id="description" value={post.description} onChange={handleChange} >
-                </textarea>
-                <br/>
-                <input type="submit" value="Submit" />
-                <button className="deleteButton">Delete</button>
-            </form>
-        </div>
-    )
-}
+  const handleDelete = async () => {
+    await supabase.from('crewmates').delete().eq('id', id);
+    navigate('/');
+  };
 
-export default EditPost
+  return (
+    <div>
+      <form onSubmit={handleUpdate}>
+        <label>Name</label>
+        <input type="text" name="name" value={crewmate.name} onChange={handleChange} />
+        <label>Attribute</label>
+        <input type="text" name="attribute" value={crewmate.attribute} onChange={handleChange} />
+        <button type="submit">Update</button>
+        <button type="button" onClick={handleDelete}>Delete</button>
+      </form>
+    </div>
+  );
+};
+
+export default EditCrewmate;
